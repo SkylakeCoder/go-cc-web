@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>中国象棋</title>
+</head>
+<body style="background:black">
+	<canvas id="chessboard" width="760" height="850" style="margin:auto;display:block">
+		你的浏览器不支持HTML5，无法正常显示。
+	</canvas>
+	<script type="text/javascript" src="js/ChessConst.js"></script>
+	<script type="text/javascript" src="js/Chess.js"></script>
+	<script type="text/javascript" src="js/ChessBoard.js"></script>
+	<script type="text/javascript">
+		window.onload = function() {
+			ChessBoard.Init()			
+		}
+	</script>
+</body>
+</html>
