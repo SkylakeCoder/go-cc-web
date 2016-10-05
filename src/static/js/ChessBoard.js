@@ -1,36 +1,107 @@
 ChessBoard = {
     BOARD_ROW: 10,
-    BOARD_COL: 9
+    BOARD_COL: 9,
+    START_X: 0,
+    START_Y: 0,
+    STEP_X: 84,
+    STEP_Y: 84.5,
+    CHESS_W: 80,
+    CHESS_H: 80,
+
+    backgroundImg: null,
+    chessImgMap: {},
+    currentClickedChess: null
 };
 
 ChessBoard.Init = function() {
-	this.InitBackground();
-}
-
-ChessBoard.InitBackground = function() {
+    var self = this;
     this.canvas = document.getElementById("chessboard");
-	this.context = this.canvas.getContext("2d");
-	var backgroundImg = new Image();
-	backgroundImg.src = "img/bg.png";
-	if (backgroundImg.complete) {
-	    this.context.drawImage(backgroundImg, 0, 0);    
-	} else {
-	    var that = this;
-        backgroundImg.onload = function() {
-            that.context.drawImage(backgroundImg, 0, 0);
-            that.InitChesses()
-        }	    
-	}
+    this.canvas.onmousedown = function(event) {
+        self.onMouseDown(event);
+    };
+    this.canvas.onmouseup = function(event) {
+        self.onMouseUp(event);
+    };
+    this.canvas.onmousemove = function(event) {
+        self.onMouseMove(event);
+    };
+    this.context = this.canvas.getContext("2d");
+    this.initChess();
 }
 
-ChessBoard.InitChesses = function() {
-    this.chessInfo = []
+ChessBoard.getPointOnCanvas = function(pageX, pageY) {
+    var box = this.canvas.getBoundingClientRect();
+    return {
+        x: pageX - box.left * (this.canvas.width / box.width),
+        y: pageY - box.top * (this.canvas.height / box.height)
+    };
+}
+
+ChessBoard.onMouseDown = function(event) {
+    var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
+    console.log("mouse down: x=" + canvasXY.x + ", y=" + canvasXY.y);
+    var chess = this.getChessUnderPoint(canvasXY.x, canvasXY.y);
+    if (chess != null) {
+        if (this.currentClickedChess == null) {
+            this.currentClickedChess = chess;
+        } else {
+            alert("error...")
+        }
+    } else {
+        if (this.currentClickedChess != null) {
+            var rowCol = this.getRowColByCanvasXY(canvasXY.x, canvasXY.y);
+            var row = rowCol.row;
+            var col = rowCol.col;
+            this.chessInfo[row][col] = this.currentClickedChess;
+            this.currentClickedChess = null;
+
+            this.drawChessboard();
+        }
+    }
+}
+
+ChessBoard.onMouseUp = function(event) {
+    var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
+    console.log("mouse up: x=" + canvasXY.x + ", y=" + canvasXY.y);
+}
+
+ChessBoard.onMouseMove = function(event) {
+    var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
+    //console.log("mouse move: x=" + canvasXY.x + ", y=" + canvasXY.y);
+}
+
+ChessBoard.getRowColByCanvasXY = function(canvasX, canvasY) {
+    return {
+        row: Math.floor(canvasY / this.STEP_Y),
+        col: Math.floor(canvasX / this.STEP_X)
+    };
+}
+
+ChessBoard.getChessUnderPoint = function(canvasX, canvasY) {
+    var rowCol = this.getRowColByCanvasXY(canvasX, canvasY);
+    var row = rowCol.row;
+    var col = rowCol.col;
+    if (row >=0 && row < this.BOARD_ROW &&
+        col >=0 && col < this.BOARD_COL) {
+        var chess = this.chessInfo[row][col];
+        console.log("chess.type=" + chess.type + ", chess.color=" + chess.color);
+        if (chess.type != ChessType.NULL) {
+            return chess;
+        } else {
+            return null;
+        }
+    }
+    return null;
+}
+
+ChessBoard.initChess = function() {
+    this.chessInfo = [];
     for (var row = 0; row < this.BOARD_ROW; row++) {
-        var rowList = []
-        this.chessInfo.push(rowList)
+        var rowList = [];
+        this.chessInfo.push(rowList);
         for (var col = 0; col < this.BOARD_COL; col++) {
             var chess = this.createChess(ChessType.NULL, ChessColor.NULL);
-            rowList.push(chess)           
+            rowList.push(chess);
         }
     }
     
@@ -106,25 +177,35 @@ ChessBoard.InitChesses = function() {
         }
     ];
     
-    this.DrawChesses(); 
+    this.drawChessboard();
 }
 
-ChessBoard.DrawChesses = function() {
-    var startX = 0;
-    var startY = 0;
-    var stepX = 84;
-    var stepY = 84.5;
-    var x = startX;
-    var y = startY;
+ChessBoard.drawChessboard = function() {
+    this.backgroundImg = new Image();
+    this.backgroundImg.src = "img/bg.png";
+    if (this.backgroundImg.complete) {
+        this.context.drawImage(this.backgroundImg, 0, 0);
+        this.drawAllChess();
+    } else {
+        var self = this;
+        this.backgroundImg.onload = function() {
+            self.context.drawImage(self.backgroundImg, 0, 0);
+            self.drawAllChess();
+        }
+    }
+}
+ChessBoard.drawAllChess = function() {
+    var x = this.START_X;
+    var y = this.START_Y;
     for (var row = 0; row < this.BOARD_ROW; row++) {
         for (var col = 0; col < this.BOARD_COL; col++) {
             var chess = this.chessInfo[row][col];
             var url = this.chessConfig[chess.type][chess.color];
             this.drawChess(url, x, y)
-            x += stepX;
+            x += this.STEP_X;
         }
-        x = startX;
-        y += stepY;
+        x = this.START_X;
+        y += this.STEP_Y;
     }
 }
 
@@ -134,16 +215,17 @@ ChessBoard.createChess = function(chessType, chessColor) {
 }
 
 ChessBoard.drawChess = function(src, x, y) {
-    var chessW = 80;
-    var chessH = 80;
-    var chessImg = new Image();
+    if (this.chessImgMap[src] == null) {
+        this.chessImgMap[src] = new Image();
+    }
+    var chessImg = this.chessImgMap[src];
     chessImg.src = src;
     if (chessImg.complete) {
-        this.context.drawImage(chessImg, x, y, chessW, chessH);
+        this.context.drawImage(chessImg, x, y, this.CHESS_W, this.CHESS_H);
     } else {
-        var that = this;
+        var self = this;
         chessImg.onload = function() {
-            that.context.drawImage(chessImg, x, y, chessW, chessH);
+            self.context.drawImage(chessImg, x, y, self.CHESS_W, self.CHESS_H);
         }
     }   
 }
