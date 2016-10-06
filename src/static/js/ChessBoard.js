@@ -9,7 +9,8 @@ ChessBoard = {
     CHESS_H: 80,
 
     backgroundImg: null,
-    chessImgMap: {},
+    chessImageUsingList: [],
+    chessImageUnusedList: [],
     currentClickedChess: null
 };
 
@@ -49,10 +50,15 @@ ChessBoard.onMouseDown = function(event) {
         }
     } else {
         if (this.currentClickedChess != null) {
+            var type = this.currentClickedChess.type;
+            var color = this.currentClickedChess.color;
             var rowCol = this.getRowColByCanvasXY(canvasXY.x, canvasXY.y);
             var row = rowCol.row;
             var col = rowCol.col;
-            this.chessInfo[row][col] = this.currentClickedChess;
+            this.chessInfo[row][col] = this.createChess(type, color, row, col);
+            var oldRow = this.currentClickedChess.row;
+            var oldCol = this.currentClickedChess.col;
+            this.chessInfo[oldRow][oldCol] = null;
             this.currentClickedChess = null;
 
             this.drawChessboard();
@@ -85,7 +91,7 @@ ChessBoard.getChessUnderPoint = function(canvasX, canvasY) {
         col >=0 && col < this.BOARD_COL) {
         var chess = this.chessInfo[row][col];
         console.log("chess.type=" + chess.type + ", chess.color=" + chess.color);
-        if (chess.type != ChessType.NULL) {
+        if (chess && chess.type != ChessType.NULL) {
             return chess;
         } else {
             return null;
@@ -106,44 +112,44 @@ ChessBoard.initChess = function() {
     }
     
     // Black.
-    this.chessInfo[0][0] = this.createChess(ChessType.CAR, ChessColor.BLACK);
-    this.chessInfo[0][1] = this.createChess(ChessType.HORSE, ChessColor.BLACK);
-    this.chessInfo[0][2] = this.createChess(ChessType.ELEPHANT, ChessColor.BLACK);
-    this.chessInfo[0][3] = this.createChess(ChessType.GUARD, ChessColor.BLACK);
-    this.chessInfo[0][4] = this.createChess(ChessType.KING, ChessColor.BLACK);
-    this.chessInfo[0][5] = this.createChess(ChessType.GUARD, ChessColor.BLACK);
-    this.chessInfo[0][6] = this.createChess(ChessType.ELEPHANT, ChessColor.BLACK);
-    this.chessInfo[0][7] = this.createChess(ChessType.HORSE, ChessColor.BLACK);
-    this.chessInfo[0][8] = this.createChess(ChessType.CAR, ChessColor.BLACK);
+    this.chessInfo[0][0] = this.createChess(ChessType.CAR, ChessColor.BLACK, 0, 0);
+    this.chessInfo[0][1] = this.createChess(ChessType.HORSE, ChessColor.BLACK, 0, 1);
+    this.chessInfo[0][2] = this.createChess(ChessType.ELEPHANT, ChessColor.BLACK, 0, 2);
+    this.chessInfo[0][3] = this.createChess(ChessType.GUARD, ChessColor.BLACK, 0, 3);
+    this.chessInfo[0][4] = this.createChess(ChessType.KING, ChessColor.BLACK, 0, 4);
+    this.chessInfo[0][5] = this.createChess(ChessType.GUARD, ChessColor.BLACK, 0, 5);
+    this.chessInfo[0][6] = this.createChess(ChessType.ELEPHANT, ChessColor.BLACK, 0, 6);
+    this.chessInfo[0][7] = this.createChess(ChessType.HORSE, ChessColor.BLACK, 0, 7);
+    this.chessInfo[0][8] = this.createChess(ChessType.CAR, ChessColor.BLACK, 0, 8);
     
-    this.chessInfo[2][1] = this.createChess(ChessType.CANNON, ChessColor.BLACK);
-    this.chessInfo[2][7] = this.createChess(ChessType.CANNON, ChessColor.BLACK);
+    this.chessInfo[2][1] = this.createChess(ChessType.CANNON, ChessColor.BLACK, 2, 1);
+    this.chessInfo[2][7] = this.createChess(ChessType.CANNON, ChessColor.BLACK, 2, 7);
     
-    this.chessInfo[3][0] = this.createChess(ChessType.PAWN, ChessColor.BLACK);
-    this.chessInfo[3][2] = this.createChess(ChessType.PAWN, ChessColor.BLACK);
-    this.chessInfo[3][4] = this.createChess(ChessType.PAWN, ChessColor.BLACK);
-    this.chessInfo[3][6] = this.createChess(ChessType.PAWN, ChessColor.BLACK);
-    this.chessInfo[3][8] = this.createChess(ChessType.PAWN, ChessColor.BLACK);
+    this.chessInfo[3][0] = this.createChess(ChessType.PAWN, ChessColor.BLACK, 3, 0);
+    this.chessInfo[3][2] = this.createChess(ChessType.PAWN, ChessColor.BLACK, 3, 2);
+    this.chessInfo[3][4] = this.createChess(ChessType.PAWN, ChessColor.BLACK, 3, 4);
+    this.chessInfo[3][6] = this.createChess(ChessType.PAWN, ChessColor.BLACK, 3, 6);
+    this.chessInfo[3][8] = this.createChess(ChessType.PAWN, ChessColor.BLACK, 3, 8);
 
     // Red.
-    this.chessInfo[9][0] = this.createChess(ChessType.CAR, ChessColor.RED);
-    this.chessInfo[9][1] = this.createChess(ChessType.HORSE, ChessColor.RED);
-    this.chessInfo[9][2] = this.createChess(ChessType.ELEPHANT, ChessColor.RED);
-    this.chessInfo[9][3] = this.createChess(ChessType.GUARD, ChessColor.RED);
-    this.chessInfo[9][4] = this.createChess(ChessType.KING, ChessColor.RED);
-    this.chessInfo[9][5] = this.createChess(ChessType.GUARD, ChessColor.RED);
-    this.chessInfo[9][6] = this.createChess(ChessType.ELEPHANT, ChessColor.RED);
-    this.chessInfo[9][7] = this.createChess(ChessType.HORSE, ChessColor.RED);
-    this.chessInfo[9][8] = this.createChess(ChessType.CAR, ChessColor.RED);
+    this.chessInfo[9][0] = this.createChess(ChessType.CAR, ChessColor.RED, 9, 0);
+    this.chessInfo[9][1] = this.createChess(ChessType.HORSE, ChessColor.RED, 9, 1);
+    this.chessInfo[9][2] = this.createChess(ChessType.ELEPHANT, ChessColor.RED, 9, 2);
+    this.chessInfo[9][3] = this.createChess(ChessType.GUARD, ChessColor.RED, 9, 3);
+    this.chessInfo[9][4] = this.createChess(ChessType.KING, ChessColor.RED, 9, 4);
+    this.chessInfo[9][5] = this.createChess(ChessType.GUARD, ChessColor.RED, 9, 5);
+    this.chessInfo[9][6] = this.createChess(ChessType.ELEPHANT, ChessColor.RED, 9, 6);
+    this.chessInfo[9][7] = this.createChess(ChessType.HORSE, ChessColor.RED, 9, 7);
+    this.chessInfo[9][8] = this.createChess(ChessType.CAR, ChessColor.RED, 9, 8);
     
-    this.chessInfo[7][1] = this.createChess(ChessType.CANNON, ChessColor.RED);
-    this.chessInfo[7][7] = this.createChess(ChessType.CANNON, ChessColor.RED);
+    this.chessInfo[7][1] = this.createChess(ChessType.CANNON, ChessColor.RED, 7, 1);
+    this.chessInfo[7][7] = this.createChess(ChessType.CANNON, ChessColor.RED, 7, 7);
     
-    this.chessInfo[6][0] = this.createChess(ChessType.PAWN, ChessColor.RED);
-    this.chessInfo[6][2] = this.createChess(ChessType.PAWN, ChessColor.RED);
-    this.chessInfo[6][4] = this.createChess(ChessType.PAWN, ChessColor.RED);
-    this.chessInfo[6][6] = this.createChess(ChessType.PAWN, ChessColor.RED);
-    this.chessInfo[6][8] = this.createChess(ChessType.PAWN, ChessColor.RED);
+    this.chessInfo[6][0] = this.createChess(ChessType.PAWN, ChessColor.RED, 6, 0);
+    this.chessInfo[6][2] = this.createChess(ChessType.PAWN, ChessColor.RED, 6, 2);
+    this.chessInfo[6][4] = this.createChess(ChessType.PAWN, ChessColor.RED, 6, 4);
+    this.chessInfo[6][6] = this.createChess(ChessType.PAWN, ChessColor.RED, 6, 6);
+    this.chessInfo[6][8] = this.createChess(ChessType.PAWN, ChessColor.RED, 6, 8);
     
     this.chessConfig = [
         {},
@@ -181,7 +187,14 @@ ChessBoard.initChess = function() {
 }
 
 ChessBoard.drawChessboard = function() {
-    this.backgroundImg = new Image();
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    console.log("clearRect: width=" + this.canvas.width + ", height=" + this.canvas.height);
+    while (this.chessImageUsingList.length > 0) {
+        this.chessImageUnusedList.push(this.chessImageUsingList.pop());
+    }
+    if (this.backgroundImg == null) {
+        this.backgroundImg = new Image();
+    }
     this.backgroundImg.src = "img/bg.png";
     if (this.backgroundImg.complete) {
         this.context.drawImage(this.backgroundImg, 0, 0);
@@ -200,8 +213,10 @@ ChessBoard.drawAllChess = function() {
     for (var row = 0; row < this.BOARD_ROW; row++) {
         for (var col = 0; col < this.BOARD_COL; col++) {
             var chess = this.chessInfo[row][col];
-            var url = this.chessConfig[chess.type][chess.color];
-            this.drawChess(url, x, y)
+            if (chess != null) {
+                var url = this.chessConfig[chess.type][chess.color];
+                this.drawChess(url, x, y);
+            }
             x += this.STEP_X;
         }
         x = this.START_X;
@@ -209,16 +224,21 @@ ChessBoard.drawAllChess = function() {
     }
 }
 
-ChessBoard.createChess = function(chessType, chessColor) {
-    var chess = new Chess(chessType, chessColor);
+ChessBoard.createChess = function(chessType, chessColor, chessRow, chessCol) {
+    chessRow = chessRow || -1;
+    chessCol = chessCol || -1;
+    var chess = new Chess(chessType, chessColor, chessRow, chessCol);
     return chess;
 }
 
 ChessBoard.drawChess = function(src, x, y) {
-    if (this.chessImgMap[src] == null) {
-        this.chessImgMap[src] = new Image();
+    var chessImg = null;
+    if (this.chessImageUnusedList.length > 0) {
+        chessImg = this.chessImageUnusedList.pop();
+    } else {
+        chessImg = new Image();
+        this.chessImageUsingList.push(chessImg);
     }
-    var chessImg = this.chessImgMap[src];
     chessImg.src = src;
     if (chessImg.complete) {
         this.context.drawImage(chessImg, x, y, this.CHESS_W, this.CHESS_H);
