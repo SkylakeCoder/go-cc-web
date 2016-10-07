@@ -102,12 +102,12 @@ ChessBoard.chessToString = function(chess) {
 }
 
 ChessBoard.onMouseUp = function(event) {
-    var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
-    console.log("mouse up: x=" + canvasXY.x + ", y=" + canvasXY.y);
+    //var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
+    //console.log("mouse up: x=" + canvasXY.x + ", y=" + canvasXY.y);
 }
 
 ChessBoard.onMouseMove = function(event) {
-    var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
+    //var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
     //console.log("mouse move: x=" + canvasXY.x + ", y=" + canvasXY.y);
 }
 
@@ -221,12 +221,16 @@ ChessBoard.initChess = function() {
     this.drawChessboard();
 }
 
-ChessBoard.drawChessboard = function() {
+ChessBoard.drawChessboard = function(debugFlag) {
+    debugFlag = debugFlag || false;
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     console.log("clearRect: width=" + this.canvas.width + ", height=" + this.canvas.height);
-    while (this.chessImageUsingList.length > 0) {
-        this.chessImageUnusedList.push(this.chessImageUsingList.pop());
+    if (debugFlag) {
+        return;
     }
+    /*while (this.chessImageUsingList.length > 0) {
+        this.chessImageUnusedList.push(this.chessImageUsingList.pop());
+    }*/
     if (this.backgroundImg == null) {
         this.backgroundImg = new Image();
     }
@@ -242,13 +246,14 @@ ChessBoard.drawChessboard = function() {
         }
     }
 }
+
 ChessBoard.drawAllChess = function() {
     var x = this.START_X;
     var y = this.START_Y;
     for (var row = 0; row < this.BOARD_ROW; row++) {
         for (var col = 0; col < this.BOARD_COL; col++) {
             var chess = this.chessInfo[row][col];
-            if (chess != null) {
+            if (chess.type != ChessType.NULL) {
                 var url = this.chessConfig[chess.type][chess.color];
                 this.drawChess(url, x, y);
             }
@@ -260,22 +265,31 @@ ChessBoard.drawAllChess = function() {
 }
 
 ChessBoard.createChess = function(chessType, chessColor, chessRow, chessCol) {
-    chessType = chessType || 0;
-    chessColor = chessColor || 0;
-    chessRow = chessRow || -1;
-    chessCol = chessCol || -1;
+    if (chessType == undefined) {
+        chessType = ChessType.NULL;
+    }
+    if (chessColor == undefined) {
+        chessColor = ChessType.NULL;
+    }
+    if (chessRow == undefined) {
+        chessRow = -1;
+    }
+    if (chessCol == undefined) {
+        chessCol = -1;
+    }
     var chess = new Chess(chessType, chessColor, chessRow, chessCol);
     return chess;
 }
 
 ChessBoard.drawChess = function(src, x, y) {
-    var chessImg = null;
+    /*var chessImg = null;
     if (this.chessImageUnusedList.length > 0) {
         chessImg = this.chessImageUnusedList.pop();
     } else {
         chessImg = new Image();
         this.chessImageUsingList.push(chessImg);
-    }
+    }*/
+    var chessImg = new Image();
     chessImg.src = src;
     if (chessImg.complete) {
         this.context.drawImage(chessImg, x, y, this.CHESS_W, this.CHESS_H);
