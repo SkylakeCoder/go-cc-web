@@ -58,12 +58,47 @@ ChessBoard.onMouseDown = function(event) {
             this.chessInfo[row][col] = this.createChess(type, color, row, col);
             var oldRow = this.currentClickedChess.row;
             var oldCol = this.currentClickedChess.col;
-            this.chessInfo[oldRow][oldCol] = null;
+            this.chessInfo[oldRow][oldCol] = this.createChess();
             this.currentClickedChess = null;
+            this.dump();
 
             this.drawChessboard();
         }
     }
+}
+
+ChessBoard.dump = function() {
+    for (var row = 0; row < this.BOARD_ROW; row++) {
+        for (var col = 0; col < this.BOARD_COL; col++) {
+            var chess = this.chessInfo[row][col];
+            if (chess == null) {
+                console.log("[" + row + ", " + col + "] = " + "null");
+            } else {
+                console.log("[" + row + ", " + col + "] = " + this.chessToString(chess));
+            }
+        }
+    }
+}
+
+ChessBoard.chessToString = function(chess) {
+    var redChessNameArray = [
+        "", "车", "马", "炮", "相", "士", "帅", "兵"
+    ];
+    var blackChessNameArray = [
+        "", "车", "马", "炮", "象", "仕", "将", "卒"
+    ];
+    var strColor = "ERROR";
+    var strName = "ERROR";
+    if (chess.color == ChessColor.RED) {
+        strColor = "红";
+        strName = redChessNameArray[chess.type];
+    } else if (chess.color == ChessColor.BLACK) {
+        strColor = "黑";
+        strName = blackChessNameArray[chess.type];
+    } else {
+        return "Empty";
+    }
+    return strColor + strName;
 }
 
 ChessBoard.onMouseUp = function(event) {
@@ -225,6 +260,8 @@ ChessBoard.drawAllChess = function() {
 }
 
 ChessBoard.createChess = function(chessType, chessColor, chessRow, chessCol) {
+    chessType = chessType || 0;
+    chessColor = chessColor || 0;
     chessRow = chessRow || -1;
     chessCol = chessCol || -1;
     var chess = new Chess(chessType, chessColor, chessRow, chessCol);
