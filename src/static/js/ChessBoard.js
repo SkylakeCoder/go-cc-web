@@ -11,7 +11,8 @@ ChessBoard = {
     backgroundImg: null,
     chessImageUsingList: [],
     chessImageUnusedList: [],
-    currentClickedChess: null
+    currentSelectedChess: null,
+    isRedTurn: true
 };
 
 ChessBoard.Init = function() {
@@ -20,14 +21,19 @@ ChessBoard.Init = function() {
     this.canvas.onmousedown = function(event) {
         self.onMouseDown(event);
     };
-    this.canvas.onmouseup = function(event) {
-        self.onMouseUp(event);
-    };
-    this.canvas.onmousemove = function(event) {
-        self.onMouseMove(event);
-    };
     this.context = this.canvas.getContext("2d");
     this.initChess();
+}
+
+ChessBoard.toString = function() {
+    var str = "";
+    for (var row = 0; row < this.BOARD_ROW; row++) {
+        for (var col = 0; col < this.BOARD_COL; col++) {
+            var chess = this.chessInfo[row][col];
+            str += chess.toString();
+        }
+    }
+    return str;
 }
 
 ChessBoard.getPointOnCanvas = function(pageX, pageY) {
@@ -38,32 +44,65 @@ ChessBoard.getPointOnCanvas = function(pageX, pageY) {
     };
 }
 
+ChessBoard.drawImage = function(img, src, x, y, w, h) {
+    img.src = src;
+    if (img.complete) {
+        this.context.drawImage(img, x, y, w, h);
+    } else {
+        var self = this;
+        img.onload = function() {
+            self.context.drawImage(img, x, y, w, h);
+        };
+    }
+}
+
+ChessBoard.setCurrentSelectedChess = function(chess) {
+    if (chess != null && (this.currentSelectedChess == null ||
+            this.currentSelectedChess.row != chess.row ||
+            this.currentSelectedChess.col != chess.col)) {
+        this.drawChessboard();
+    }
+    this.currentSelectedChess = chess;
+}
+
+ChessBoard.moveCurrentSelectedChess = function(targetRow, targetCol) {
+    if (this.currentSelectedChess != null) {
+        var type = this.currentSelectedChess.type;
+        var color = this.currentSelectedChess.color;
+        this.chessInfo[targetRow][targetCol] = this.createChess(type, color, targetRow, targetCol);
+        var oldRow = this.currentSelectedChess.row;
+        var oldCol = this.currentSelectedChess.col;
+        this.chessInfo[oldRow][oldCol] = this.createChess();
+        this.currentSelectedChess = null;
+        this.dump();
+        this.isRedTurn = !this.isRedTurn;
+
+        this.drawChessboard();
+    } else {
+        alert("error::moveCurrentSelectedChess...");
+    }
+}
+
 ChessBoard.onMouseDown = function(event) {
+    if (!this.isRedTurn) {
+        return;
+    }
     var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
     console.log("mouse down: x=" + canvasXY.x + ", y=" + canvasXY.y);
     var chess = this.getChessUnderPoint(canvasXY.x, canvasXY.y);
     if (chess != null) {
-        if (this.currentClickedChess == null) {
-            this.currentClickedChess = chess;
+        if (this.currentSelectedChess == null && chess.color == ChessColor.RED) {
+            this.setCurrentSelectedChess(chess);
         } else {
-            alert("error...")
+            if (chess.color == this.currentSelectedChess.color) {
+                this.setCurrentSelectedChess(chess);
+            } else {
+                this.moveCurrentSelectedChess(chess.row, chess.col);
+            }
         }
     } else {
-        if (this.currentClickedChess != null) {
-            var type = this.currentClickedChess.type;
-            var color = this.currentClickedChess.color;
-            var rowCol = this.getRowColByCanvasXY(canvasXY.x, canvasXY.y);
-            var row = rowCol.row;
-            var col = rowCol.col;
-            this.chessInfo[row][col] = this.createChess(type, color, row, col);
-            var oldRow = this.currentClickedChess.row;
-            var oldCol = this.currentClickedChess.col;
-            this.chessInfo[oldRow][oldCol] = this.createChess();
-            this.currentClickedChess = null;
-            this.dump();
-
-            this.drawChessboard();
-        }
+        var rowCol = this.getRowColByCanvasXY(canvasXY.x, canvasXY.y);
+        this.moveCurrentSelectedChess(rowCol.row, rowCol.col);
     }
 }
 
@@ -78,6 +117,7 @@ ChessBoard.dump = function() {
             }
         }
     }
+    console.log(this.toString());
 }
 
 ChessBoard.chessToString = function(chess) {
@@ -99,16 +139,6 @@ ChessBoard.chessToString = function(chess) {
         return "Empty";
     }
     return strColor + strName;
-}
-
-ChessBoard.onMouseUp = function(event) {
-    //var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
-    //console.log("mouse up: x=" + canvasXY.x + ", y=" + canvasXY.y);
-}
-
-ChessBoard.onMouseMove = function(event) {
-    //var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
-    //console.log("mouse move: x=" + canvasXY.x + ", y=" + canvasXY.y);
 }
 
 ChessBoard.getRowColByCanvasXY = function(canvasX, canvasY) {
@@ -228,9 +258,6 @@ ChessBoard.drawChessboard = function(debugFlag) {
     if (debugFlag) {
         return;
     }
-    /*while (this.chessImageUsingList.length > 0) {
-        this.chessImageUnusedList.push(this.chessImageUsingList.pop());
-    }*/
     if (this.backgroundImg == null) {
         this.backgroundImg = new Image();
     }
@@ -256,6 +283,14 @@ ChessBoard.drawAllChess = function() {
             if (chess.type != ChessType.NULL) {
                 var url = this.chessConfig[chess.type][chess.color];
                 this.drawChess(url, x, y);
+                if (this.currentSelectedChess != null &&
+                    this.currentSelectedChess.row == chess.row &&
+                    this.currentSelectedChess.col == chess.col) {
+                    var x = chess.col * this.STEP_X;
+                    var y = chess.row * this.STEP_Y;
+                    var flagImg = new Image();
+                    this.drawImage(flagImg, "img/r_box.png", x, y, this.CHESS_W, this.CHESS_H);
+                }
             }
             x += this.STEP_X;
         }
@@ -282,21 +317,6 @@ ChessBoard.createChess = function(chessType, chessColor, chessRow, chessCol) {
 }
 
 ChessBoard.drawChess = function(src, x, y) {
-    /*var chessImg = null;
-    if (this.chessImageUnusedList.length > 0) {
-        chessImg = this.chessImageUnusedList.pop();
-    } else {
-        chessImg = new Image();
-        this.chessImageUsingList.push(chessImg);
-    }*/
     var chessImg = new Image();
-    chessImg.src = src;
-    if (chessImg.complete) {
-        this.context.drawImage(chessImg, x, y, this.CHESS_W, this.CHESS_H);
-    } else {
-        var self = this;
-        chessImg.onload = function() {
-            self.context.drawImage(chessImg, x, y, self.CHESS_W, self.CHESS_H);
-        }
-    }   
+    this.drawImage(chessImg, src, x, y, this.CHESS_W, this.CHESS_H);
 }

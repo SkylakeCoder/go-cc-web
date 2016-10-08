@@ -6,3 +6,7 @@ function Chess(type, color, row, col) {
     this.row = row;
     this.col = col;
 }
+
+Chess.prototype.toString = function() {
+    return "" + this.type + this.color;
+}
