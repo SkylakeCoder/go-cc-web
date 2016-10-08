@@ -180,6 +180,10 @@ ChessMovementChecker.CheckElephant = function(chessElephant, targetRow, targetCo
     if (Math.abs(disRow) != 2 || Math.abs(disCol) != 2) {
         return false;
     }
+    if (targetRow != 0 && targetRow != 2 && targetRow != 4 &&
+        targetRow != 5 && targetRow != 7 && targetRow != 9) {
+        return false;
+    }
     var blockRow = Math.floor((row + targetRow) / 2);
     var blockCol = Math.floor((col + targetCol) / 2);
     if (chessBoard[blockRow][blockCol].type != ChessType.NULL) {
