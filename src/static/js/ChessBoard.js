@@ -79,12 +79,26 @@ ChessBoard.moveCurrentSelectedChess = function(targetRow, targetCol) {
         var oldCol = this.currentSelectedChess.col;
         this.chessBoard[oldRow][oldCol] = this.createChess();
         this.currentSelectedChess = null;
-        this.dump();
+        // this.dump();
         if (!this.debugFlag) {
             this.isRedTurn = !this.isRedTurn;
         }
-
         this.drawChessboard();
+
+        var self = this;
+        $.get("http://localhost:8686?chess=" + this.toString(), function(data, status) {
+            console.log("data=>" + data);
+            var index = 0;
+            for (var i = 0; i < data.length; i += 2) {
+                var type = +data[i];
+                var color = +data[i + 1];
+                var row = Math.floor(index / self.BOARD_COL);
+                var col = Math.floor(index % self.BOARD_COL);
+                index++;
+                self.chessBoard[row][col] = self.createChess(type, color, row, col);
+            }
+            self.drawChessboard();
+        });
     }
 }
 
@@ -258,7 +272,6 @@ ChessBoard.initChess = function() {
 
 ChessBoard.drawChessboard = function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    console.log("clearRect: width=" + this.canvas.width + ", height=" + this.canvas.height);
     if (this.backgroundImg == null) {
         this.backgroundImg = new Image();
     }
