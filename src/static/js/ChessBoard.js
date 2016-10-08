@@ -12,7 +12,8 @@ ChessBoard = {
     chessImageUsingList: [],
     chessImageUnusedList: [],
     currentSelectedChess: null,
-    isRedTurn: true
+    isRedTurn: true,
+    debugFlag: true
 };
 
 ChessBoard.Init = function() {
@@ -67,6 +68,10 @@ ChessBoard.setCurrentSelectedChess = function(chess) {
 
 ChessBoard.moveCurrentSelectedChess = function(targetRow, targetCol) {
     if (this.currentSelectedChess != null) {
+        if (!ChessMovementChecker.Check(this.currentSelectedChess, targetRow, targetCol)) {
+            console.log("error movement...");
+            return;
+        }
         var type = this.currentSelectedChess.type;
         var color = this.currentSelectedChess.color;
         this.chessBoard[targetRow][targetCol] = this.createChess(type, color, targetRow, targetCol);
@@ -75,11 +80,11 @@ ChessBoard.moveCurrentSelectedChess = function(targetRow, targetCol) {
         this.chessBoard[oldRow][oldCol] = this.createChess();
         this.currentSelectedChess = null;
         this.dump();
-        this.isRedTurn = !this.isRedTurn;
+        if (!this.debugFlag) {
+            this.isRedTurn = !this.isRedTurn;
+        }
 
         this.drawChessboard();
-    } else {
-        alert("error::moveCurrentSelectedChess...");
     }
 }
 
@@ -94,7 +99,7 @@ ChessBoard.onMouseDown = function(event) {
         if (this.currentSelectedChess == null && chess.color == ChessColor.RED) {
             this.setCurrentSelectedChess(chess);
         } else {
-            if (chess.color == this.currentSelectedChess.color) {
+            if (this.currentSelectedChess && chess.color == this.currentSelectedChess.color) {
                 this.setCurrentSelectedChess(chess);
             } else {
                 this.moveCurrentSelectedChess(chess.row, chess.col);
@@ -251,13 +256,9 @@ ChessBoard.initChess = function() {
     this.drawChessboard();
 }
 
-ChessBoard.drawChessboard = function(debugFlag) {
-    debugFlag = debugFlag || false;
+ChessBoard.drawChessboard = function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     console.log("clearRect: width=" + this.canvas.width + ", height=" + this.canvas.height);
-    if (debugFlag) {
-        return;
-    }
     if (this.backgroundImg == null) {
         this.backgroundImg = new Image();
     }
