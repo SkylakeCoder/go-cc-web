@@ -13,7 +13,7 @@ ChessBoard = {
     chessImageUnusedList: [],
     currentSelectedChess: null,
     isRedTurn: true,
-    debugFlag: true
+    debugFlag: false
 };
 
 ChessBoard.Init = function() {
