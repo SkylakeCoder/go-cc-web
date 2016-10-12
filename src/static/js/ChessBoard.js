@@ -98,6 +98,9 @@ ChessBoard.moveCurrentSelectedChess = function(targetRow, targetCol) {
                 self.chessBoard[row][col] = self.createChess(type, color, row, col);
             }
             self.drawChessboard();
+            if (index != 0) {
+                self.isRedTurn = !self.isRedTurn;
+            }
         });
     }
 }
