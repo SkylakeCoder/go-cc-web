@@ -86,7 +86,7 @@ ChessBoard.moveCurrentSelectedChess = function(targetRow, targetCol) {
         this.drawChessboard();
 
         var self = this;
-        $.get("http://localhost:8686?chess=" + this.toString(), function(data, status) {
+        $.get("http://localhost:8688?chess=" + this.toString(), function(data, status) {
             console.log("data=>" + data);
             var index = 0;
             for (var i = 0; i < data.length; i += 2) {
