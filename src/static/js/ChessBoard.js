@@ -87,7 +87,7 @@ ChessBoard.moveCurrentSelectedChess = function(targetRow, targetCol) {
 
         var self = this;
         $.get("http://localhost:8686?chess=" + this.toString(), function(data, status) {
-            console.log("data=>" + data);
+            //console.log("data=>" + data);
             var index = 0;
             for (var i = 0; i < data.length; i += 2) {
                 var type = +data[i];
@@ -110,7 +110,7 @@ ChessBoard.onMouseDown = function(event) {
         return;
     }
     var canvasXY = this.getPointOnCanvas(event.pageX, event.pageY);
-    console.log("mouse down: x=" + canvasXY.x + ", y=" + canvasXY.y);
+    //console.log("mouse down: x=" + canvasXY.x + ", y=" + canvasXY.y);
     var chess = this.getChessUnderPoint(canvasXY.x, canvasXY.y);
     if (chess != null) {
         if (this.currentSelectedChess == null && chess.color == ChessColor.RED) {
@@ -177,7 +177,7 @@ ChessBoard.getChessUnderPoint = function(canvasX, canvasY) {
     if (row >=0 && row < this.BOARD_ROW &&
         col >=0 && col < this.BOARD_COL) {
         var chess = this.chessBoard[row][col];
-        console.log("chess.type=" + chess.type + ", chess.color=" + chess.color);
+        //console.log("chess.type=" + chess.type + ", chess.color=" + chess.color);
         if (chess && chess.type != ChessType.NULL) {
             return chess;
         } else {
